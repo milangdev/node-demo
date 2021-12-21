@@ -1,1 +1,61 @@
-<h1>Home filee {{title}}</h1>
+<div style="height:40vh; width:80vw">
+  <canvas id="monthly-deals-chart"></canvas>
+</div>
+
+<script>
+  const ctx = document.getElementById('monthly-deals-chart');
+  const data = {{{data}}};
+
+  /**
+   * Can be sent via API along with data.
+   * Keeping it simple here by hardcoding
+   */
+  const yAxisLabels = [
+    '2020-11', '2020-12', '2021-01', '2021-02', '2021-03', '2021-04', '2021-05', '2021-06', '2021-07', '2021-08', '2021-09', '2021-10', '2021-11', '2021-12',
+  ];
+
+  /**
+   * This can also be sent via API along with data (that'd be better).
+   * Keeping it simple here by hardcoding.
+   */
+  const colors = [
+    '#b49695', '#123234', '#ff4612', '#274e13', '#16537e', '#810707', '#6577fa', '#0c343d', '#3fff00',
+  ];
+
+  const chartData = {
+    labels: yAxisLabels,
+    datasets: data.map((d, i) => {
+      return {
+        label: d.site_title,
+        data: d.deals_data,
+        parsing: {
+          yAxisKey: 'deal_count',
+          xAxisKey: 'month',
+        },
+        backgroundColor: colors[i],
+        borderColor: colors[i],
+      };
+    })
+  };
+
+  const config = {
+    type: 'line',
+    data: chartData,
+    options: {
+      plugins: {
+        tooltip: {
+          callbacks: {
+            /**
+             * Override tooltip label.
+             */
+            label: function (context) {
+              return `${context.dataset.label}: ${context.raw.deal_count} Deals - Average Revenue per listing: ${Intl.NumberFormat('en').format(context.raw.avg_revenue.toFixed(2))}`;
+            }
+          }
+        }
+      }
+    }
+  };
+
+  new Chart(ctx, config);
+</script>
